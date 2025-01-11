@@ -1,0 +1,181 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadratic Equation Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        #keyboard {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        #keyboard button {
+            padding: 10px;
+            font-size: 18px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #keyboard button:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">Quadratic Equation Solver</h1>
+        <div id="equation-container" class="text-center mb-4">
+            <span id="equation" class="text-xl font-semibold"></span>
+        </div>
+        <input type="text" id="answer" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Enter your answer">
+        <button id="submit" class="w-full bg-blue-500 text-white p-3 rounded-md">Submit</button>
+        <div id="result" class="text-center mt-4 text-lg font-semibold"></div>
+        <div id="keyboard" class="mt-6">
+            <button onclick="addToAnswer('1')">1</button>
+            <button onclick="addToAnswer('2')">2</button>
+            <button onclick="addToAnswer('3')">3</button>
+            <button onclick="addToAnswer('4')">4</button>
+            <button onclick="addToAnswer('5')">5</button>
+            <button onclick="addToAnswer('6')">6</button>
+            <button onclick="addToAnswer('7')">7</button>
+            <button onclick="addToAnswer('8')">8</button>
+            <button onclick="addToAnswer('9')">9</button>
+            <button onclick="addToAnswer('0')">0</button>
+            <button onclick="addToAnswer('+')">+</button>
+            <button onclick="addToAnswer('-')">-</button>
+            <button onclick="addToAnswer('*')">*</button>
+            <button onclick="addToAnswer('/')">/</button>
+            <button onclick="addToAnswer('(')">(</button>
+            <button onclick="addToAnswer(')')">)</button>
+            <button onclick="addToAnswer('.')">.</button>
+            <button onclick="addToAnswer('√')">√</button>
+        </div>
+    </div>
+
+    <script>
+        let currentEquation = {};
+        let userAnswer = "";
+
+        // Function to generate a random quadratic equation
+        function generateEquation() {
+            const a = Math.floor(Math.random() * 5) + 1; // Random coefficient for x²
+            const b = Math.floor(Math.random() * 10) - 5; // Random coefficient for x
+            const c = Math.floor(Math.random() * 10) - 5; // Random constant
+            currentEquation = { a, b, c };
+
+            // Display the equation
+            const equationContainer = document.getElementById('equation');
+            equationContainer.textContent = `${a}x² + ${b}x + ${c} = 0`;
+
+            // Calculate the roots of the equation
+            calculateRoots();
+        }
+
+        // Function to calculate the roots of the quadratic equation
+        function calculateRoots() {
+            const { a, b, c } = currentEquation;
+            const discriminant = b * b - 4 * a * c;
+
+            let root1, root2;
+            let resultText = "";
+
+            if (discriminant > 0) {
+                root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                resultText = `The roots are real and different: ${root1.toFixed(2)} and ${root2.toFixed(2)}`;
+                currentEquation.root1 = root1.toFixed(2);
+                currentEquation.root2 = root2.toFixed(2);
+            } else if (discriminant === 0) {
+                root1 = root2 = -b / (2 * a);
+                resultText = `The root is real and repeated: ${root1.toFixed(2)}`;
+                currentEquation.root1 = root2 = root1.toFixed(2);
+            } else {
+                const realPart = (-b / (2 * a)).toFixed(2);
+                const imaginaryPart = (Math.sqrt(-discriminant) / (2 * a)).toFixed(2);
+                resultText = `The roots are complex: ${realPart} + ${imaginaryPart}i and ${realPart} - ${imaginaryPart}i`;
+                currentEquation.root1 = `${realPart} + ${imaginaryPart}i`;
+                currentEquation.root2 = `${realPart} - ${imaginaryPart}i`;
+            }
+
+            console.log(resultText);  // You can remove this line if not needed for debugging.
+        }
+
+        // Function to parse answers (fraction, square root, etc.)
+        function parseAnswer(input) {
+            // Handle square root (√) in the answer
+            if (input.includes('√')) {
+                const number = input.replace('√', '');
+                return Math.sqrt(parseFloat(number));
+            }
+
+            // Check if the input is a valid fraction (e.g., '3/4')
+            if (input.includes('/')) {
+                const parts = input.split('/');
+                return parseFloat(parts[0]) / parseFloat(parts[1]);
+            }
+
+            // Try parsing as a number (decimals or integers)
+            const parsedNumber = parseFloat(input);
+            if (!isNaN(parsedNumber)) {
+                return parsedNumber;
+            }
+
+            // If it's neither a valid fraction nor a valid number, return null
+            return null;
+        }
+
+        // Function to check if the user answer is correct
+        function checkAnswer() {
+            const resultContainer = document.getElementById('result');
+            const userAnswerParsed = parseAnswer(userAnswer);
+
+            const root1 = parseAnswer(currentEquation.root1);
+            const root2 = parseAnswer(currentEquation.root2);
+
+            // Check if the user answer matches the roots
+            if (userAnswerParsed === root1 || userAnswerParsed === root2) {
+                resultContainer.textContent = 'Correct!';
+                resultContainer.classList.remove('text-red-500');
+                resultContainer.classList.add('text-green-500');
+            } else {
+                resultContainer.textContent = `Incorrect. The correct roots are ${currentEquation.root1} and ${currentEquation.root2}.`;
+                resultContainer.classList.remove('text-green-500');
+                resultContainer.classList.add('text-red-500');
+            }
+
+            // Disable submit button to prevent multiple submissions before next equation loads
+            document.getElementById('submit').disabled = true;
+
+            // Clear input and load next equation after 2 seconds
+            setTimeout(() => {
+                resultContainer.textContent = '';
+                generateEquation();
+                document.getElementById('answer').value = '';
+                document.getElementById('submit').disabled = false;
+            }, 2000);
+        }
+
+        // Function to append the clicked button value to the answer field
+        function addToAnswer(value) {
+            userAnswer += value;
+            document.getElementById('answer').value = userAnswer;
+        }
+
+        // Event listener for submit button
+        document.getElementById('submit').addEventListener('click', () => {
+            checkAnswer();
+        });
+
+        // Load the first equation when the page loads
+        window.onload = generateEquation;
+    </script>
+</body>
+</html>
